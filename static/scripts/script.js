@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const welcomeMessage = "Hello! I'm your AI assistant. How can I help you today?";
     const messageElement = document.querySelector('.welcome-message .message-content');
     
-    function typeWriter(element, text, speed = 50) {
+    function typeWriter(element, text, speed = 40) {
         let i = 0;
         element.innerHTML = ''; // Clear existing text
         
