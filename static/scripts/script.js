@@ -24,3 +24,15 @@ document.addEventListener('DOMContentLoaded', () => {
         typeWriter(messageElement, welcomeMessage);
     }
 });
+
+// Add this to your existing script
+document.querySelector('.mobile-menu-btn').addEventListener('click', () => {
+    document.querySelector('.nav-links').classList.toggle('show');
+});
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-content')) {
+        document.querySelector('.nav-links').classList.remove('show');
+    }
+});
