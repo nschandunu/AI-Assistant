@@ -1,23 +1,28 @@
-import openai
-from dotenv import load_dotenv
 import os
+from openai import OpenAI
+from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-# Configure OpenAI API key
-openai.api_key = os.getenv('OPENAI_API_KEY')
+# Initialize OpenAI client with Nebius configuration
+client = OpenAI(
+    base_url="https://api.studio.nebius.ai/v1/",
+    api_key=os.environ.get("NEBIUS_API_KEY"),
+)
 
 def get_bot_response(user_input):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+        completion = client.chat.completions.create(
+            model="meta-llama/Meta-Llama-3.1-70B-Instruct",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": user_input}
-            ]
+            ],
+            temperature=0.6,
+            max_tokens=512,
+            top_p=0.9
         )
-        return response.choices[0].message.content
+        return completion.choices[0].message.content
     except Exception as e:
         return f"An error occurred: {str(e)}"
 
