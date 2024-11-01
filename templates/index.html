@@ -3,40 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chatbot</title>
+    <title>AI Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="chat-container">
+    <!-- New Website Header/Navigation -->
+    <nav class="website-header">
+        <div class="nav-content">
+            <div class="logo">
+                <i class="fas fa-robot"></i>
+                <span>NexusAI</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="active">Home</a>
+                <a href="#chat-section" class="ai-assistant-link">AI Assistant</a>
+                <a href="#">About Us</a>
+                <a href="#">Contact</a>
+            </div>
+            <div class="mobile-menu-btn">
+                <i class="fas fa-bars"></i>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Existing Chat Container -->
+    <div id="chat-section" class="chat-container">
         <div class="chat-header">
-            <h1>test</h1>
+            <div class="header-content">
+                <div class="avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="header-text">
+                    <h1>AI Assistant</h1>
+                    <span class="status">Online</span>
+                </div>
+            </div>
         </div>
+
         <div class="chat-messages" id="chat-messages">
-            <!-- Messages will appear here -->
+            <div class="message bot-message welcome-message">
+                <div class="message-content">
+                    Hello! I'm your AI assistant. How can I help you today?
+                </div>
+                <div class="timestamp">Just now</div>
+            </div>
         </div>
+
+        <div class="typing-indicator hidden" id="typing-indicator">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+
         <div class="chat-input">
-            <input type="text" id="user-input" placeholder="Type your message...">
-            <button onclick="sendMessage()">Send</button>
+            <div class="input-wrapper">
+                <input type="text" id="user-input" placeholder="Type your message here...">
+                <button onclick="sendMessage()" id="send-button">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit',
+                hour12: true 
+            });
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typing-indicator').classList.remove('hidden');
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typing-indicator').classList.add('hidden');
+        }
+
         function addMessage(message, isUser) {
             const messagesDiv = document.getElementById('chat-messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = isUser ? 'message user-message' : 'message bot-message';
-            messageDiv.textContent = message;
-            messagesDiv.appendChild(messageDiv);
+            const messageContainer = document.createElement('div');
+            messageContainer.className = `message-container ${isUser ? 'user-message-container' : 'bot-message-container'}`;
+            
+            // Create message wrapper
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            // Create message content
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = message;
+            
+            // Create timestamp
+            const timestampDiv = document.createElement('div');
+            timestampDiv.className = 'timestamp';
+            timestampDiv.textContent = getCurrentTime();
+            
+            // Assemble message
+            messageWrapper.appendChild(contentDiv);
+            messageWrapper.appendChild(timestampDiv);
+            
+            // Add avatar for bot messages only (WhatsApp style)
+            if (!isUser) {
+                const avatar = document.createElement('div');
+                avatar.className = 'avatar bot-avatar';
+                avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                messageContainer.appendChild(avatar);
+            }
+            
+            messageContainer.appendChild(messageWrapper);
+            messagesDiv.appendChild(messageContainer);
+            
+            // Scroll to bottom
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
         async function sendMessage() {
             const input = document.getElementById('user-input');
+            const sendButton = document.getElementById('send-button');
             const message = input.value.trim();
             
             if (message) {
+                // Disable input and button while processing
+                input.disabled = true;
+                sendButton.disabled = true;
+                
                 addMessage(message, true);
                 input.value = '';
+                
+                showTypingIndicator();
                 
                 try {
                     const response = await fetch('/get_response', {
@@ -48,22 +147,49 @@
                     });
                     
                     const data = await response.json();
+                    hideTypingIndicator();
+                    
                     if (data.error) {
                         addMessage('Error: ' + data.error, false);
                     } else {
                         addMessage(data.response, false);
                     }
                 } catch (error) {
+                    hideTypingIndicator();
                     addMessage('Error: Could not connect to server', false);
                 }
+                
+                // Re-enable input and button
+                input.disabled = false;
+                sendButton.disabled = false;
+                input.focus();
             }
         }
 
         // Allow Enter key to send message
         document.getElementById('user-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
                 sendMessage();
             }
+        });
+
+        // Smooth scroll for AI Assistant link
+        document.querySelector('.ai-assistant-link').addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('chat-section').scrollIntoView({
+                behavior: 'smooth'
+            });
+            
+            // Update active state in navigation
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+            });
+            this.classList.add('active');
+        });
+
+        document.querySelector('.mobile-menu-btn').addEventListener('click', function() {
+            document.querySelector('.nav-links').classList.toggle('show');
         });
     </script>
 </body>
