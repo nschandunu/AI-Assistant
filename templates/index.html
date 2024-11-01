@@ -44,6 +44,7 @@
         <div class="chat-messages" id="chat-messages">
             <div class="message bot-message welcome-message">
                 <div class="message-content">
+                    <!-- The text here will be replaced by the typing animation -->
                     Hello! I'm your AI assistant. How can I help you today?
                 </div>
                 <div class="timestamp">Just now</div>
@@ -267,5 +268,8 @@
             </div>
         </div>
     </footer>
+
+    <!-- Add this before closing </body> tag -->
+    <script src="{{ url_for('static', filename='scripts/script.js') }}"></script>
 </body>
 </html>
